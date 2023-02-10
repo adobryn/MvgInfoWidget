@@ -8,6 +8,6 @@ import retrofit2.http.Headers
 interface RestApi {
 
     @Headers("Content-Type: application/json")
-    @GET("/de:09184:2310")
+    @GET("/api/fahrinfo/departure/de:09184:2310/")
     fun getDepartureInfoList(): Call<List<DepartureInfo>>
 }

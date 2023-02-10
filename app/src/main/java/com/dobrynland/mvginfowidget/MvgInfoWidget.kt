@@ -5,17 +5,16 @@ import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.util.Log
 import android.widget.RemoteViews
+import androidx.lifecycle.LiveData
 import com.dobrynland.mvginfowidget.data.DepartureInfo
-import com.dobrynland.mvginfowidget.rest.RestApi
-import com.dobrynland.mvginfowidget.rest.RetrofitHelper
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import com.dobrynland.mvginfowidget.data.DepartureInfoRepository
 
 /**
  * Implementation of App Widget functionality.
  */
 class MvgInfoWidget : AppWidgetProvider() {
+    var widgetText = ""
+
     override fun onUpdate(
         context: Context,
         appWidgetManager: AppWidgetManager,
@@ -28,54 +27,40 @@ class MvgInfoWidget : AppWidgetProvider() {
     }
 
     override fun onEnabled(context: Context) {
-        // Enter relevant functionality for when the first widget is created
+        showFirstDepartureInfo()
     }
 
     override fun onDisabled(context: Context) {
         // Enter relevant functionality for when the last widget is disabled
     }
-}
 
-internal fun updateAppWidget(
-    context: Context,
-    appWidgetManager: AppWidgetManager,
-    appWidgetId: Int
-) {
-    Log.i(MvgInfoWidget::class.simpleName, "updateAppWidget")
+    private fun updateAppWidget(
+        context: Context,
+        appWidgetManager: AppWidgetManager,
+        appWidgetId: Int
+    ) {
+        Log.i(MvgInfoWidget::class.simpleName, "updateAppWidget")
 
-    getInfo()
-   /* GlobalScope.launch {
-        val result = mvgApiClient.getDepartureInfoList()
-        Log.d("Result status: ", result.)
-        Log.d("Result: ", result.body().toString())
-    }*/
+        val views = RemoteViews(context.packageName, R.layout.mvg_info_widget)
+        views.setTextViewText(R.id.appwidget_text, widgetText)
 
-    val widgetText = ""
+        // Instruct the widget manager to update the widget
+        appWidgetManager.updateAppWidget(appWidgetId, views)
+    }
 
-    val views = RemoteViews(context.packageName, R.layout.mvg_info_widget)
-    views.setTextViewText(R.id.appwidget_text, widgetText)
+    private val repository: DepartureInfoRepository = DepartureInfoRepository()
 
-    // Instruct the widget manager to update the widget
-    appWidgetManager.updateAppWidget(appWidgetId, views)
-}
+    private fun getFirstDepartureInfo(): LiveData<List<DepartureInfo>> {
+        return repository.getDepartures()
+    }
 
-fun getInfo() {
-    val service = RetrofitHelper.getInstance().create(RestApi::class.java).getDepartureInfoList()
-
-    service.enqueue(object : Callback<List<DepartureInfo>> {
-        override fun onResponse(
-            call: Call<List<DepartureInfo>>?,
-            response: Response<List<DepartureInfo>>?
-        ) {
-            if (response?.body() != null) {
-                Log.i("Response: ", response.body().toString())
-            }
-            //recyclerAdapter.setMovieListItems(response.body()!!)
+    private fun showFirstDepartureInfo() {
+        getFirstDepartureInfo().observeForever {
+            widgetText = it[0].toString()
         }
+    }
 
-        override fun onFailure(call: Call<List<DepartureInfo>>?, t: Throwable?) {
-            Log.e("Error fetching response: ", t?.message!!)
-        }
-    })
 }
+
+
 
