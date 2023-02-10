@@ -32,7 +32,8 @@ data class Departure(
     val sev: Boolean,
     val platform: String,
     val stopPositionNumber: Long,
-    val infoMessages: List<String>
+    val infoMessages: List<String>,
+    val displayInfoMessage: String? = null
 )
 
 @Serializable

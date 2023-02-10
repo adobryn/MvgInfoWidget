@@ -13,22 +13,23 @@ import retrofit2.Retrofit
 
 class DepartureInfoRepository {
     private val contentType = "application/json".toMediaType()
+    var json = Json { ignoreUnknownKeys = true; prettyPrint = true }
 
     private val webservice: RestApi by lazy {
 
         Retrofit.Builder()
             .baseUrl("https://www.mvg.de/")
-            .addConverterFactory(Json.asConverterFactory(contentType))
+            .addConverterFactory(json.asConverterFactory(contentType))
             .build().create(RestApi::class.java)
     }
 
     private var client: RestApi = webservice
 
-    fun getDepartures(): LiveData<List<DepartureInfo>> {
-        val liveData = MutableLiveData<List<DepartureInfo>>()
+    fun getDepartures(): LiveData<DepartureInfo> {
+        val liveData = MutableLiveData<DepartureInfo>()
 
-        client.getDepartureInfoList().enqueue(object: Callback<List<DepartureInfo>> {
-            override fun onResponse(call: Call<List<DepartureInfo>>, response: Response<List<DepartureInfo>>) {
+        client.getDepartureInfoList().enqueue(object: Callback<DepartureInfo> {
+            override fun onResponse(call: Call<DepartureInfo>, response: Response<DepartureInfo>) {
                 if (response.isSuccessful) {
 
                     // When data is available, populate LiveData
@@ -36,7 +37,7 @@ class DepartureInfoRepository {
                 }
             }
 
-            override fun onFailure(call: Call<List<DepartureInfo>>, t: Throwable) {
+            override fun onFailure(call: Call<DepartureInfo>, t: Throwable) {
                 t.printStackTrace()
             }
         })

@@ -50,13 +50,13 @@ class MvgInfoWidget : AppWidgetProvider() {
 
     private val repository: DepartureInfoRepository = DepartureInfoRepository()
 
-    private fun getFirstDepartureInfo(): LiveData<List<DepartureInfo>> {
+    private fun getFirstDepartureInfo(): LiveData<DepartureInfo> {
         return repository.getDepartures()
     }
 
     private fun showFirstDepartureInfo() {
         getFirstDepartureInfo().observeForever {
-            widgetText = it[0].toString()
+            widgetText = it.toString()
         }
     }
 

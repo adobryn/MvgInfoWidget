@@ -9,5 +9,5 @@ interface RestApi {
 
     @Headers("Content-Type: application/json")
     @GET("/api/fahrinfo/departure/de:09184:2310/")
-    fun getDepartureInfoList(): Call<List<DepartureInfo>>
+    fun getDepartureInfoList(): Call<DepartureInfo>
 }
