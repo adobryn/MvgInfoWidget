@@ -5,11 +5,12 @@ import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.util.Log
 import android.widget.RemoteViews
+import com.dobrynland.mvginfowidget.data.DepartureInfo
 import com.dobrynland.mvginfowidget.rest.RestApi
 import com.dobrynland.mvginfowidget.rest.RetrofitHelper
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 /**
  * Implementation of App Widget functionality.
@@ -35,7 +36,6 @@ class MvgInfoWidget : AppWidgetProvider() {
     }
 }
 
-@OptIn(DelicateCoroutinesApi::class)
 internal fun updateAppWidget(
     context: Context,
     appWidgetManager: AppWidgetManager,
@@ -43,12 +43,12 @@ internal fun updateAppWidget(
 ) {
     Log.i(MvgInfoWidget::class.simpleName, "updateAppWidget")
 
-    val mvgApi = RetrofitHelper.getInstance().create(RestApi::class.java)
-    GlobalScope.launch {
-        val result = mvgApi.getDepartureInfoList()
-        Log.d("Result status: ", result.message())
+    getInfo()
+   /* GlobalScope.launch {
+        val result = mvgApiClient.getDepartureInfoList()
+        Log.d("Result status: ", result.)
         Log.d("Result: ", result.body().toString())
-    }
+    }*/
 
     val widgetText = ""
 
@@ -57,5 +57,25 @@ internal fun updateAppWidget(
 
     // Instruct the widget manager to update the widget
     appWidgetManager.updateAppWidget(appWidgetId, views)
+}
+
+fun getInfo() {
+    val service = RetrofitHelper.getInstance().create(RestApi::class.java).getDepartureInfoList()
+
+    service.enqueue(object : Callback<List<DepartureInfo>> {
+        override fun onResponse(
+            call: Call<List<DepartureInfo>>?,
+            response: Response<List<DepartureInfo>>?
+        ) {
+            if (response?.body() != null) {
+                Log.i("Response: ", response.body().toString())
+            }
+            //recyclerAdapter.setMovieListItems(response.body()!!)
+        }
+
+        override fun onFailure(call: Call<List<DepartureInfo>>?, t: Throwable?) {
+            Log.e("Error fetching response: ", t?.message!!)
+        }
+    })
 }
 
