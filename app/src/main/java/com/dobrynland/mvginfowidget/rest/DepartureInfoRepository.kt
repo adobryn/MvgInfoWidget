@@ -1,19 +1,24 @@
-package com.dobrynland.mvginfowidget.data
+package com.dobrynland.mvginfowidget.rest
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.dobrynland.mvginfowidget.rest.RestApi
+import com.dobrynland.mvginfowidget.data.DepartureInfo
+import kotlinx.serialization.json.Json
+import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import okhttp3.MediaType.Companion.toMediaType
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
 class DepartureInfoRepository {
+    private val contentType = "application/json".toMediaType()
+
     private val webservice: RestApi by lazy {
+
         Retrofit.Builder()
             .baseUrl("https://www.mvg.de/")
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(Json.asConverterFactory(contentType))
             .build().create(RestApi::class.java)
     }
 

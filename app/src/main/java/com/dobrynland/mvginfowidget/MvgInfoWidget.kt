@@ -7,7 +7,7 @@ import android.util.Log
 import android.widget.RemoteViews
 import androidx.lifecycle.LiveData
 import com.dobrynland.mvginfowidget.data.DepartureInfo
-import com.dobrynland.mvginfowidget.data.DepartureInfoRepository
+import com.dobrynland.mvginfowidget.rest.DepartureInfoRepository
 
 /**
  * Implementation of App Widget functionality.
