@@ -1,4 +1,4 @@
-package com.dobrynland.mvginfowidget.data
+package com.dobrynland.mvginfowidget.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

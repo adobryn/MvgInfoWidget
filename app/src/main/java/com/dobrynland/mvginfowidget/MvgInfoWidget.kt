@@ -5,15 +5,23 @@ import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.util.Log
 import android.widget.RemoteViews
-import androidx.lifecycle.LiveData
-import com.dobrynland.mvginfowidget.data.DepartureInfo
-import com.dobrynland.mvginfowidget.rest.DepartureInfoRepository
+import com.dobrynland.mvginfowidget.data.AppContainer
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 /**
  * Implementation of App Widget functionality.
  */
-class MvgInfoWidget : AppWidgetProvider() {
+class MvgInfoWidget : AppWidgetProvider(), CoroutineScope {
+    lateinit var container: AppContainer
     var widgetText = ""
+
+    private var job: Job = Job()
+
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main + job
 
     override fun onUpdate(
         context: Context,
@@ -27,11 +35,15 @@ class MvgInfoWidget : AppWidgetProvider() {
     }
 
     override fun onEnabled(context: Context) {
-        showFirstDepartureInfo()
+        container = AppContainer()
+        launch {
+            val result =  callGetApi()
+            onResult(result) // onResult is called on the main thread
+        }
     }
 
     override fun onDisabled(context: Context) {
-        // Enter relevant functionality for when the last widget is disabled
+        job.cancel()
     }
 
     private fun updateAppWidget(
@@ -41,6 +53,7 @@ class MvgInfoWidget : AppWidgetProvider() {
     ) {
         Log.i(MvgInfoWidget::class.simpleName, "updateAppWidget")
 
+        //widgetText = getWidgetText()
         val views = RemoteViews(context.packageName, R.layout.mvg_info_widget)
         views.setTextViewText(R.id.appwidget_text, widgetText)
 
@@ -48,18 +61,13 @@ class MvgInfoWidget : AppWidgetProvider() {
         appWidgetManager.updateAppWidget(appWidgetId, views)
     }
 
-    private val repository: DepartureInfoRepository = DepartureInfoRepository()
-
-    private fun getFirstDepartureInfo(): LiveData<DepartureInfo> {
-        return repository.getDepartures()
+    suspend fun callGetApi(): String {
+        return container.departureInfoRepository.getDepartures().departures.toString()
     }
 
-    private fun showFirstDepartureInfo() {
-        getFirstDepartureInfo().observeForever {
-            widgetText = it.toString()
-        }
+    fun onResult(result: String) {
+        widgetText = result
     }
-
 }
 
 
